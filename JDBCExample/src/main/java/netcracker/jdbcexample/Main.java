@@ -45,17 +45,16 @@ public class Main {
 
     public static void statement() {
         Connection conn = null;
+        Statement statement = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
-            Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery("select * from author;");
+            statement = conn.createStatement();
+            rs = statement.executeQuery("select * from author;");
             System.out.println("Statement");
             while (rs.next()) {
                 System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
             }
-            rs.close();
-            statement.close();
-            conn.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -64,9 +63,9 @@ public class Main {
             ex.printStackTrace();
         } finally {
             try {
-                if (conn != null) {
-                    conn.close();
-                }
+                rs.close();
+                statement.close();
+                conn.close();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -75,18 +74,17 @@ public class Main {
 
     public static void preparedStatement() {
         Connection conn = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
-            PreparedStatement preparedStatement = conn.prepareStatement("select * from author where name=? ; ");
+            preparedStatement = conn.prepareStatement("select * from author where name=? ; ");
             preparedStatement.setString(1, "Rostislav");
-            ResultSet rs = preparedStatement.executeQuery();
+            rs = preparedStatement.executeQuery();
             System.out.println("preparedStatement");
             while (rs.next()) {
                 System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
             }
-            rs.close();
-            preparedStatement.close();
-            conn.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -95,9 +93,9 @@ public class Main {
             ex.printStackTrace();
         } finally {
             try {
-                if (conn != null) {
-                    conn.close();
-                }
+                rs.close();
+                preparedStatement.close();
+                conn.close();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -106,17 +104,16 @@ public class Main {
 
     public static void callabeStatement() {
         Connection conn = null;
+        CallableStatement callableStatement = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
-            CallableStatement callableStatement = conn.prepareCall(" { call getSurnameProcedure } ");
-            ResultSet rs = callableStatement.executeQuery();
+            callableStatement = conn.prepareCall(" { call getSurnameProcedure } ");
+            rs = callableStatement.executeQuery();
             System.out.println("callableStatement");
             while (rs.next()) {
                 System.out.println(rs.getString("surname"));
             }
-            rs.close();
-            callableStatement.close();
-            conn.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -125,9 +122,9 @@ public class Main {
             ex.printStackTrace();
         } finally {
             try {
-                if (conn != null) {
-                    conn.close();
-                }
+                rs.close();
+                callableStatement.close();
+                conn.close();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
