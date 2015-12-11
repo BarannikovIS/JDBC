@@ -11,28 +11,27 @@ import java.sql.*;
 import java.io.*;
 import java.util.*;
 import java.io.FileInputStream;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author Иван
  */
 public class Main {
-
-    /**
-     * @param args the command line arguments
-     */
+    private static final Logger exLog= Logger.getLogger(Main.class);
     public static void main(String[] args) {
         statement();
         preparedStatement();
         callabeStatement();
     }
 
-    public static Connection getConnection() throws SQLException, IOException, ClassNotFoundException {
+    public static Connection getConnection() throws SQLException, ClassNotFoundException {
         Properties property = new Properties();
-        FileInputStream in = new FileInputStream("db.properties");
-        property.load(in);
-        in.close();
-
+        try (FileInputStream in = new FileInputStream("db.properties");) {
+            property.load(in);
+        } catch (IOException ex) {
+            exLog.error(ex);
+        }
         String drivers = property.getProperty("jdbc.drivers");
         Class.forName(drivers);
 
@@ -44,90 +43,37 @@ public class Main {
     }
 
     public static void statement() {
-        Connection conn = null;
-        Statement statement = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            statement = conn.createStatement();
-            rs = statement.executeQuery("select * from author;");
+        try (Connection conn = getConnection(); Statement statement = conn.createStatement(); ResultSet rs = statement.executeQuery("select * from author;")) {
             System.out.println("Statement");
             while (rs.next()) {
                 System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                rs.close();
-                statement.close();
-                conn.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+        } catch (SQLException | ClassNotFoundException ex) {
+            exLog.error(ex);
         }
     }
 
     public static void preparedStatement() {
-        Connection conn = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            preparedStatement = conn.prepareStatement("select * from author where name=? ; ");
+
+        try (Connection conn = getConnection(); PreparedStatement preparedStatement = conn.prepareStatement("select * from author where name=? ; "); ResultSet rs = preparedStatement.executeQuery();) {
             preparedStatement.setString(1, "Rostislav");
-            rs = preparedStatement.executeQuery();
             System.out.println("preparedStatement");
             while (rs.next()) {
                 System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                rs.close();
-                preparedStatement.close();
-                conn.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+        } catch (SQLException | ClassNotFoundException ex) {
+            exLog.error(ex);
         }
     }
 
     public static void callabeStatement() {
-        Connection conn = null;
-        CallableStatement callableStatement = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            callableStatement = conn.prepareCall(" { call getSurnameProcedure } ");
-            rs = callableStatement.executeQuery();
+        try(Connection conn= getConnection();CallableStatement callableStatement=conn.prepareCall(" { call getSurnameProcedure } ");ResultSet rs =callableStatement.executeQuery();) {
             System.out.println("callableStatement");
             while (rs.next()) {
                 System.out.println(rs.getString("surname"));
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } finally {
-            try {
-                rs.close();
-                callableStatement.close();
-                conn.close();
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+        } catch (SQLException | ClassNotFoundException ex) {
+            exLog.error(ex);
         }
     }
 }
