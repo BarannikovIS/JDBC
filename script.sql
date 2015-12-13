@@ -23,7 +23,8 @@ SELECT surname from author where id=1;
 END$$
 
 DELIMITER $$ 
-CREATE PROCEDURE `getSurnameById` (IN valueID int(4)) 
-BEGIN  
-select surname from author where id=valueID; 
+CREATE PROCEDURE `getSurnameByIdNew` (IN valueID int(4),OUT sname varchar(30)) 
+BEGIN 
+select surname into sname from author where id=valueID; 
 END $$
+

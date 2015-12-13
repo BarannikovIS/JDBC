@@ -11,6 +11,7 @@ import java.sql.*;
 import java.io.*;
 import java.util.*;
 import java.io.FileInputStream;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -19,7 +20,7 @@ import org.apache.log4j.Logger;
  */
 public class Main {
 
-    private static final Logger exLog = Logger.getLogger(Main.class);
+    private static final Logger Log = Logger.getLogger(Main.class);
 
     public static void main(String[] args) {
         statement();
@@ -32,26 +33,26 @@ public class Main {
         try (FileInputStream in = new FileInputStream("db.properties");) {
             property.load(in);
         } catch (IOException ex) {
-            exLog.error(ex);
+            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
         }
-        String drivers = property.getProperty("jdbc.drivers");
+        String drivers = property.getProperty("mysql.drivers");
         Class.forName(drivers);
 
-        String url = property.getProperty("jdbc.url");
-        String name = property.getProperty("jdbc.username");
-        String password = property.getProperty("jdbc.password");
+        String url = property.getProperty("mysql.url");
+        String name = property.getProperty("mysql.username");
+        String password = property.getProperty("mysql.password");
 
         return DriverManager.getConnection(url, name, password);
     }
 
     public static void statement() {
         try (Connection conn = getConnection(); Statement statement = conn.createStatement(); ResultSet rs = statement.executeQuery("select * from author;")) {
-            System.out.println("Statement");
+            Log.info("Statement");
             while (rs.next()) {
-                System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
+                Log.info(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
             }
         } catch (SQLException | ClassNotFoundException ex) {
-            exLog.error(ex);
+            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
         }
     }
 
@@ -59,27 +60,25 @@ public class Main {
         try (Connection conn = getConnection(); PreparedStatement preparedStatement = conn.prepareStatement("select * from author where name= ?;");) {
             preparedStatement.setString(1, "Rostislav");
             try (ResultSet rs = preparedStatement.executeQuery()) {
-                System.out.println("preparedStatement");
+                Log.info("preparedStatement");
                 while (rs.next()) {
-                    System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
+                    Log.info(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
                 }
             }
         } catch (SQLException | ClassNotFoundException ex) {
-            exLog.error(ex);
+            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
         }
     }
 
     public static void callabeStatement() {
-        try (Connection conn = getConnection(); CallableStatement callableStatement = conn.prepareCall(" { call getSurnameById(?) } ")) {
+        try (Connection conn = getConnection(); CallableStatement callableStatement = conn.prepareCall(" { call getSurnameByIdNew(?,?) } ")) {
             callableStatement.setInt(1, 2);
-            try (ResultSet rs = callableStatement.executeQuery()) {
-                System.out.println("callableStatement");
-                while (rs.next()) {
-                    System.out.println(rs.getString("surname"));
-                }
-            }
+            callableStatement.registerOutParameter("sname", Types.VARCHAR);
+            callableStatement.execute();
+            Log.info("callableStatement");
+            Log.info(callableStatement.getString("sname"));
         } catch (SQLException | ClassNotFoundException ex) {
-            exLog.error(ex);
+            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
         }
     }
 }
