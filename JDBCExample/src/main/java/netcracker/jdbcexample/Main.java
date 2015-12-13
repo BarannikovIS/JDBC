@@ -34,12 +34,12 @@ public class Main {
         } catch (IOException ex) {
             exLog.error(ex);
         }
-        String drivers = property.getProperty("jdbc.drivers");
+        String drivers = property.getProperty("mysql.drivers");
         Class.forName(drivers);
 
-        String url = property.getProperty("jdbc.url");
-        String name = property.getProperty("jdbc.username");
-        String password = property.getProperty("jdbc.password");
+        String url = property.getProperty("mysql.url");
+        String name = property.getProperty("mysql.username");
+        String password = property.getProperty("mysql.password");
 
         return DriverManager.getConnection(url, name, password);
     }
