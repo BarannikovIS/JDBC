@@ -11,7 +11,6 @@ import java.sql.*;
 import java.io.*;
 import java.util.*;
 import java.io.FileInputStream;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
@@ -33,7 +32,7 @@ public class Main {
         try (FileInputStream in = new FileInputStream("db.properties");) {
             property.load(in);
         } catch (IOException ex) {
-            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
+            Log.error("exception with message" + ex.getMessage(), ex);
         }
         String drivers = property.getProperty("mysql.drivers");
         Class.forName(drivers);
@@ -52,7 +51,7 @@ public class Main {
                 Log.info(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
             }
         } catch (SQLException | ClassNotFoundException ex) {
-            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
+            Log.error("exception with message" + ex.getMessage(), ex);
         }
     }
 
@@ -66,7 +65,7 @@ public class Main {
                 }
             }
         } catch (SQLException | ClassNotFoundException ex) {
-            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
+            Log.error("exception with message" + ex.getMessage(), ex);
         }
     }
 
@@ -78,7 +77,7 @@ public class Main {
             Log.info("callableStatement");
             Log.info(callableStatement.getString("sname"));
         } catch (SQLException | ClassNotFoundException ex) {
-            Log.log(Level.ERROR, "exception with message" + ex.getMessage(), ex);
+            Log.error("exception with message" + ex.getMessage(), ex);
         }
     }
 }
