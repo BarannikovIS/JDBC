@@ -18,7 +18,9 @@ import org.apache.log4j.Logger;
  * @author Иван
  */
 public class Main {
-    private static final Logger exLog= Logger.getLogger(Main.class);
+
+    private static final Logger exLog = Logger.getLogger(Main.class);
+
     public static void main(String[] args) {
         statement();
         preparedStatement();
@@ -54,12 +56,13 @@ public class Main {
     }
 
     public static void preparedStatement() {
-
-        try (Connection conn = getConnection(); PreparedStatement preparedStatement = conn.prepareStatement("select * from author where name=? ; "); ResultSet rs = preparedStatement.executeQuery();) {
+        try (Connection conn = getConnection(); PreparedStatement preparedStatement = conn.prepareStatement("select * from author where name= ?;");) {
             preparedStatement.setString(1, "Rostislav");
-            System.out.println("preparedStatement");
-            while (rs.next()) {
-                System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                System.out.println("preparedStatement");
+                while (rs.next()) {
+                    System.out.println(rs.getString("name") + rs.getString("lastname") + rs.getString("surname") + rs.getString("profession"));
+                }
             }
         } catch (SQLException | ClassNotFoundException ex) {
             exLog.error(ex);
@@ -67,10 +70,13 @@ public class Main {
     }
 
     public static void callabeStatement() {
-        try(Connection conn= getConnection();CallableStatement callableStatement=conn.prepareCall(" { call getSurnameProcedure } ");ResultSet rs =callableStatement.executeQuery();) {
-            System.out.println("callableStatement");
-            while (rs.next()) {
-                System.out.println(rs.getString("surname"));
+        try (Connection conn = getConnection(); CallableStatement callableStatement = conn.prepareCall(" { call getSurnameById(?) } ")) {
+            callableStatement.setInt(1, 2);
+            try (ResultSet rs = callableStatement.executeQuery()) {
+                System.out.println("callableStatement");
+                while (rs.next()) {
+                    System.out.println(rs.getString("surname"));
+                }
             }
         } catch (SQLException | ClassNotFoundException ex) {
             exLog.error(ex);

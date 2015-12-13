@@ -13,13 +13,17 @@ INSERT INTO  `cooking`.`author` VALUES ( 2,  'Bazhen',  ' Astafjevs',  'Tihomiro
 INSERT INTO  `cooking`.`author` VALUES ( 3,  'Yaropolk',  ' Kremer',  'Kazimirovich',  'Fumele');
 
 DELIMITER $$ 
-
 CREATE PROCEDURE `getSurnameProcedure` () 
 LANGUAGE SQL 
 DETERMINISTIC 
 SQL SECURITY DEFINER 
 COMMENT 'Procedure' 
-
 BEGIN 
 SELECT surname from author where id=1; 
 END$$
+
+DELIMITER $$ 
+CREATE PROCEDURE `getSurnameById` (IN valueID int(4)) 
+BEGIN  
+select surname from author where id=valueID; 
+END $$
